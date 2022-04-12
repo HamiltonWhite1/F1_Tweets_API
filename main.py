@@ -1,23 +1,24 @@
-from typing import Optional
+import fastapi
+import uvicorn
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles #No CSS being used currently
+from fastapi.templating import Jinja2Templates
 
-from fastapi import FastAPI
-from pydantic import BaseModel
-
+#Instantiation of application, similar to Flask
 app = FastAPI()
 
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: Optional[bool] = None
+#Connecting templates folder to application
+templates = Jinja2Templates(directory="templates")
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+#Mounting CSS to the application. None used currently.
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    return {'item_id': item_id, "q": q}
 
-@app.put("/items/{item_id}")
-def update_item(item_id: int, item: Item):
-    return {"item_price": item.price, "item_id": item_id}
+@app.get("/", response_class=HTMLResponse)
+async def read_item(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+#Runs application with ./main.py terminal command
+if __name__ == '__main__':
+    uvicorn.run(app) 
