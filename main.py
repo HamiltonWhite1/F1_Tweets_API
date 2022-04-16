@@ -29,11 +29,14 @@ async def read_item(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/tweets", response_class=HTMLResponse)
-async def read_tweet(db: Session=Depends(get_db)):
+async def read_tweet(request: Request, db: Session=Depends(get_db)):
     tweets = db.query(models.Tweet).limit(10).all()
+    display_user = []
+    display_tweet = []
     for tweet in tweets:
-        print(tweet.user['screen_name'])
-    return "hello"
+        display_user.append((tweet.user['screen_name']))
+        # display_tweet.append((tweet.full_text))
+    return templates.TemplateResponse("tweets.html", {"request": request, "users": display_user, "tweets": display_tweet})
 
 #Runs application with ./main.py terminal command
 if __name__ == '__main__':
